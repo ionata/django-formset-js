@@ -1,0 +1,225 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Django Formset JavaScript by ionata</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Django Formset JavaScript</h1>
+        <p>Dynamic Django formsets</p>
+
+        <p class="view"><a href="https://github.com/ionata/django-formset-js">View the Project on GitHub <small>ionata/django-formset-js</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/ionata/django-formset-js/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/ionata/django-formset-js/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/ionata/django-formset-js">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="django-formset-js" class="anchor" href="#django-formset-js"><span class="octicon octicon-link"></span></a>django-formset-js</h1>
+
+<p>A wrapper for a JavaScript formset helper.</p>
+
+<h2>
+<a name="installing" class="anchor" href="#installing"><span class="octicon octicon-link"></span></a>Installing</h2>
+
+<p>Install via pip:</p>
+
+<pre><code>$ pip install django-formset-js
+</code></pre>
+
+<p>Then add it and its dependancy <code>django-jquery-js</code>
+to your <code>INSTALLED_APPS</code>:</p>
+
+<div class="highlight highlight-python"><pre><span class="n">INSTALLED_APPS</span> <span class="o">+=</span> <span class="p">(</span>
+    <span class="s">'django.contrib.staticfiles'</span><span class="p">,</span>
+    <span class="s">'jquery'</span><span class="p">,</span>
+    <span class="s">'djangoformsetjs'</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+
+<h2>
+<a name="using" class="anchor" href="#using"><span class="octicon octicon-link"></span></a>Using</h2>
+
+<h3>
+<a name="include-the-javascript-library" class="anchor" href="#include-the-javascript-library"><span class="octicon octicon-link"></span></a>Include the JavaScript library</h3>
+
+<p>Both jQuery and this library must be included in your page.
+The simplest way to do this is to add the scripts as media dependencies on your form:</p>
+
+<div class="highlight highlight-python"><pre><span class="kn">from</span> <span class="nn">djangoformsetjs.utils</span> <span class="kn">import</span> <span class="n">formset_media_js</span>
+
+<span class="k">class</span> <span class="nc">MyForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Media</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        <span class="n">js</span> <span class="o">=</span> <span class="n">formset_media_js</span> <span class="o">+</span> <span class="p">(</span>
+            <span class="c"># Other form media here</span>
+        <span class="p">)</span>
+
+<span class="n">MyFormSet</span> <span class="o">=</span> <span class="n">formset_factory</span><span class="p">(</span><span class="n">MyForm</span><span class="p">)</span>
+</pre></div>
+
+<p>And then include the Media of the form in your template:</p>
+
+<pre><code>{{ formset.media }}
+</code></pre>
+
+<p>Alternatively, simply add the script tags:</p>
+
+<div class="highlight highlight-html"><pre><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"{{ STATIC_URL }}js/jquery.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"{{ STATIC_URL }}js/jquery.formset.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+</pre></div>
+
+<h3>
+<a name="render-the-formset" class="anchor" href="#render-the-formset"><span class="octicon octicon-link"></span></a>Render the formset</h3>
+
+<p>So that the library can work with your formset,
+certain blocks of your formset need to be marked up with <code>data-formset-...</code> attributes:</p>
+
+<div class="highlight highlight-html"><pre>{% load formset_tags %}
+
+<span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"formset"</span> <span class="na">data-formset-prefix=</span><span class="s">"{{ formset.prefix }}"</span><span class="nt">&gt;</span>
+    {{ formset.management_form }}
+
+    <span class="nt">&lt;div</span> <span class="na">data-formset-body</span><span class="nt">&gt;</span>
+        <span class="c">&lt;!-- New forms will be inserted in here --&gt;</span>
+        {% for form in formset %}
+            <span class="nt">&lt;div</span> <span class="na">data-formset-form</span><span class="nt">&gt;</span>
+                {{ form }}
+                <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"button"</span> <span class="na">data-formset-delete-button</span><span class="nt">&gt;</span>Delete form<span class="nt">&lt;/button&gt;</span>
+            <span class="nt">&lt;/div&gt;</span>
+        {% endfor %}
+    <span class="nt">&lt;/div&gt;</span>
+
+    <span class="c">&lt;!-- The empty form template. By wrapping this in a &lt;script&gt; tag, the</span>
+<span class="c">    __prefix__ placeholder can easily be replaced in both attributes and</span>
+<span class="c">    any scripts --&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"form-template"</span> <span class="na">data-formset-empty-form</span><span class="nt">&gt;</span>
+        <span class="p">{</span><span class="o">%</span> <span class="nx">escapescript</span> <span class="o">%</span><span class="p">}</span>
+            <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">data</span><span class="o">-</span><span class="nx">formset</span><span class="o">-</span><span class="nx">form</span><span class="o">&gt;</span>
+                <span class="p">{{</span> <span class="nx">formset</span><span class="p">.</span><span class="nx">empty_form</span> <span class="p">}}</span>
+                <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">type</span><span class="o">=</span><span class="s2">"button"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">formset</span><span class="o">-</span><span class="k">delete</span><span class="o">-</span><span class="nx">button</span><span class="o">&gt;</span><span class="nx">Delete</span> <span class="nx">form</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
+            <span class="o">&lt;</span><span class="err">/div&gt;</span>
+        <span class="p">{</span><span class="o">%</span> <span class="nx">endescapescript</span> <span class="o">%</span><span class="p">}</span>
+    <span class="nt">&lt;/script&gt;</span>
+
+    <span class="c">&lt;!-- This button will add a new form when clicked --&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"button"</span> <span class="na">value=</span><span class="s">"Add another"</span> <span class="na">data-formset-add</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;script&gt;</span><span class="nx">jQuery</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">$</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">$</span><span class="p">(</span><span class="s2">"#formset"</span><span class="p">).</span><span class="nx">formset</span><span class="p">({</span>
+            <span class="nx">animateForms</span><span class="o">:</span> <span class="kc">true</span>
+        <span class="p">});</span>
+    <span class="p">});</span><span class="nt">&lt;/script&gt;</span>
+
+<span class="nt">&lt;/div&gt;</span>
+</pre></div>
+
+<p>The <code>data-formset-</code> data attributes are:</p>
+
+<ul>
+<li><p><code>data-formset-prefix</code>:
+The value of <code>{{ formset.prefix }}</code>.
+This is used to find the management form.</p></li>
+<li><p><code>data-formset-body</code>:
+This indicates where all the child forms are.
+New forms are inserted in here.</p></li>
+<li><p><code>data-formset-form</code>:
+Every form (including the empty form) should have this attribute.</p></li>
+<li><p><code>data-formset-empty-form</code>:
+The element that contains the empty form template.
+For best results, use a <code>&lt;script&gt;</code> tag.</p></li>
+<li><p><code>data-formset-add</code>:
+A button that adds a new form.</p></li>
+<li><p><code>data-formset-delete-button</code>:
+A button that deletes that form.</p></li>
+</ul><p>The empty form template is wrapped in a <code>&lt;script&gt;</code> as plain text.
+This stops any JavaScript attached to widgets from running upon page load,
+and makes finding and replacing the <code>__prefix__</code> placeholder easier.
+The contents of the <code>&lt;script&gt;</code> should be wrapped in a <code>{% escapescript %}</code> block
+to prevent any script tags inside from closing the wrapping script tag prematurely.</p>
+
+<p>If the forms can be deleted, and contain a delete checkbox,
+the following actions occur:</p>
+
+<ul>
+<li><p>When the checkbox is checked, marking the form for deletion,
+the <code>formDeleted</code> event is fired on the <code>data-formset-form</code> container,
+and the <code>data-formset-form-deleted</code> attribute is added.</p></li>
+<li><p>When the checkbox is unchecked, marking the form as active again,
+the <code>formAdded</code> event is fired on the <code>data-formset-form</code> container,
+and the <code>data-formset-form-deleted</code> attribute is removed.</p></li>
+</ul><p>If the forms can be deleted, and contain a delete button,
+pressing the delete button will toggle the delete checkbox for that form.
+The <code>DELETE</code> field should be hidden if the delete button is used.
+The delete button is identified by the <code>data-formset-delete-button</code> attribute::</p>
+
+<div class="highlight highlight-html"><pre>{% for form in formset %}
+    <span class="nt">&lt;div</span> <span class="na">data-formset-form</span><span class="nt">&gt;</span>
+        {{ form.name }}
+        {{ form.age }}
+
+        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"hidden"</span><span class="nt">&gt;</span>{{ form.DELETE }}<span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"button"</span> <span class="na">data-formset-delete-button</span><span class="nt">&gt;</span>Delete form<span class="nt">&lt;/button&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+{% endfor %}
+</pre></div>
+
+<p>If the <code>animateForms</code> option is set when the formset is created,
+adding and deleting forms will be animated by sliding the forms in and out.</p>
+
+<p>Options</p>
+
+<hr><p>The jQuery plugin takes the following options:</p>
+
+<ul>
+<li><p><code>form</code>:
+The selector to find forms.
+Defaults to <code>[data-formset-form]</code>.</p></li>
+<li><p><code>emptyForm</code>:
+The selector to find the empty form template.
+Defaults to <code>script[type=form-template][data-formset-empty-form]</code>.</p></li>
+<li><p><code>body</code>:
+The selector to find the formset body.
+New forms will be inserted at the bottom of this element.
+Defaults to <code>[data-formset-body]</code>.</p></li>
+<li><p><code>add</code>:
+The selector to find the add button.
+Defaults to <code>[data-formset-add]</code>.</p></li>
+<li><p><code>deleteButton</code>:
+The selector to find the delete button within a form.
+Defaults to <code>[data-formset-delete-button]</code>.</p></li>
+<li><p><code>hasMaxFormsClass</code>:
+The class added to the formset when the maximum number of forms is reached.
+The maximum number of forms is pulled from the management form.
+Defaults to <code>has-max-forms</code>.</p></li>
+<li><p><code>animateForms</code>:
+Whether to animate form addition/deletion.
+Defaults to <code>false</code>.</p></li>
+</ul><h2>
+<a name="example" class="anchor" href="#example"><span class="octicon octicon-link"></span></a>Example</h2>
+
+<p>A minimal example project is provided in the <code>example/</code> directory.
+Read <code>example/README</code> for more information</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/ionata">ionata</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
